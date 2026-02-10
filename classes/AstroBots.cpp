@@ -194,6 +194,70 @@ int GraemeShip::SetupShip() {
     return Finalize();
 }
 
+// Name: SlumpyShip - Jenalee Nguyen
+// Ship should be cautious but aggressive when it sees something, 
+// and will try to flee if heavily damaged. 
+// It also tries to conserve fuel by only thrusting toward things it can see, 
+// and it prioritizes phasers over photons to save ammo.
+int SlumpyShip::SetupShip() {
+    SCAN();
+    IF_SEEN() {
+        TURN_TO_SCAN();
+        
+        IF_SCAN_LE(500) {
+            IF_SHIP_CAN_FIRE_PHASER() {
+                FIRE_PHASER();
+            }
+        }
+        IF_SCAN_LE(750) {
+            IF_SHIP_CAN_FIRE_PHOTON() {
+                FIRE_PHOTON();
+            }
+        }
+        
+        THRUST(6);
+        
+        IF_SCAN_LE(100) {
+            IF_SHIP_CAN_FIRE_PHASER() {
+                FIRE_PHASER();
+            }
+        }
+    } ELSE() {
+        THRUST(5);
+        TURN_DEG(60);
+    }
+    
+    IF_SHIP_HP_LE(4) {
+        SCAN();
+        IF_SEEN() {
+            TURN_TO_SCAN();
+            THRUST(8);
+            IF_SHIP_CAN_FIRE_PHASER() {
+                FIRE_PHASER();
+            }
+            IF_SHIP_CAN_FIRE_PHOTON() {
+                FIRE_PHOTON();
+            }
+        }
+    }
+    
+    IF_SHIP_FUEL_LE(20) {
+        SCAN();
+        IF_SEEN() {
+            IF_SCAN_LE(50) {
+                TURN_TO_SCAN();
+                THRUST(3);
+            }
+        }
+    }
+    
+    IF_SHIP_CAN_FIRE_PHOTON() {
+        FIRE_PHOTON();
+    }
+    
+    return Finalize();
+}
+
 // ===== AstroBots game implementation =====
 AstroBots::AstroBots() {
     _currentTurn = 0;
