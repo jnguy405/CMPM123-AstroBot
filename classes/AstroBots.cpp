@@ -195,64 +195,48 @@ int GraemeShip::SetupShip() {
 }
 
 // Name: SlumpyShip - Jenalee Nguyen
-// Ship should be cautious but aggressive when it sees something, 
-// and will try to flee if heavily damaged. 
-// It also tries to conserve fuel by only thrusting toward things it can see, 
-// and it prioritizes phasers over photons to save ammo.
 int SlumpyShip::SetupShip() {
     SCAN();
     IF_SEEN() {
         TURN_TO_SCAN();
-        
-        IF_SCAN_LE(500) {
+        IF_SCAN_LE(400) {
             IF_SHIP_CAN_FIRE_PHASER() {
                 FIRE_PHASER();
+                THRUST(2);
+                IF_SHIP_CAN_FIRE_PHOTON() {
+                    FIRE_PHOTON();
+                }
+                TURN_DEG(-70);
             }
         }
-        IF_SCAN_LE(750) {
-            IF_SHIP_CAN_FIRE_PHOTON() {
-                FIRE_PHOTON();
-            }
-        }
-        
-        THRUST(6);
-        
-        IF_SCAN_LE(100) {
-            IF_SHIP_CAN_FIRE_PHASER() {
-                FIRE_PHASER();
-            }
-        }
+        THRUST(2);
     } ELSE() {
-        THRUST(5);
-        TURN_DEG(60);
-    }
-    
-    IF_SHIP_HP_LE(4) {
         SCAN();
         IF_SEEN() {
             TURN_TO_SCAN();
-            THRUST(8);
-            IF_SHIP_CAN_FIRE_PHASER() {
-                FIRE_PHASER();
-            }
-            IF_SHIP_CAN_FIRE_PHOTON() {
-                FIRE_PHOTON();
+            IF_SCAN_LE(200) {
+                IF_SHIP_CAN_FIRE_PHOTON() {
+                    IF_SHIP_CAN_FIRE_PHOTON() {
+                        FIRE_PHOTON();
+                    }
+                    TURN_DEG(60);
+                }
             }
         }
+        THRUST(2);
     }
-    
-    IF_SHIP_FUEL_LE(20) {
+
+    IF_SHIP_HP_LE(4) {
+        THRUST(2);
+    }
+
+    IF_SHIP_FUEL_LE(40) {
         SCAN();
-        IF_SEEN() {
-            IF_SCAN_LE(50) {
-                TURN_TO_SCAN();
-                THRUST(3);
-            }
+        IF_SCAN_LE(200) {
+            TURN_TO_SCAN();
+                TURN_DEG(180);
+                THRUST(1);
         }
-    }
-    
-    IF_SHIP_CAN_FIRE_PHOTON() {
-        FIRE_PHOTON();
     }
     
     return Finalize();
@@ -273,6 +257,7 @@ std::vector<std::unique_ptr<ShipBase>> AstroBots::makeShips() {
     v.emplace_back(std::make_unique<DroneShip>());
     v.emplace_back(std::make_unique<MinerShip>());
     v.emplace_back(std::make_unique<GraemeShip>());
+    v.emplace_back(std::make_unique<SlumpyShip>());
     return v;
 }
 
